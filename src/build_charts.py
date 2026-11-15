@@ -67,9 +67,20 @@ plt.xticks(positions, labels, rotation=20, ha="right")
 plt.legend()
 save("borough_trip_vs_charge_share")
 
-hours = read_csv("original_sql_hourly_peaks.csv")
-plt.figure(figsize=(6.5, 4.5))
-plt.bar([f'{int(r["pickup_hour"]):02d}:00' for r in hours], [float(r["trips"]) for r in hours])
-plt.title("Selected Hourly Demand Highlights (not all 24 hours)")
-plt.ylabel("Trips")
-save("selected_hour_demand")
+# Full 24-hour chart is generated only after a validated SQL Server export.
+hourly_path = RESULTS / "original_sql_hourly_24h.csv"
+if hourly_path.exists():
+    hours = read_csv("original_sql_hourly_24h.csv")
+    by_hour = {int(r["pickup_hour"]): int(r["trips"]) for r in hours}
+    if set(by_hour) != set(range(24)) or sum(by_hour.values()) != 3324156:
+        raise ValueError("Hourly data must contain hours 0–23 and total 3,324,156 trips.")
+    plt.figure(figsize=(12, 5))
+    bars = plt.bar([f"{h:02d}" for h in range(24)], [by_hour[h] for h in range(24)])
+    plt.title("Pickup Demand Across All 24 Hours — January 2025")
+    plt.xlabel("Pickup Hour")
+    plt.ylabel("Selected Trips")
+    plt.ticklabel_format(style="plain", axis="y")
+    from matplotlib.ticker import StrMethodFormatter
+    plt.gca().yaxis.set_major_formatter(StrMethodFormatter("{x:,.0f}"))
+    plt.bar_label(bars, labels=[f"{by_hour[h]:,}" if h in (4, 17, 18) else "" for h in range(24)], padding=3, fontsize=8)
+    save("hourly_demand_24h")
