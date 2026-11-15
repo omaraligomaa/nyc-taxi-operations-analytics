@@ -5,7 +5,7 @@
 
 An end-to-end analytical case study of **January 2025 NYC Yellow Taxi trip records**. The project uses official public trip data, loads it into Microsoft SQL Server, investigates data-quality issues, and uses T-SQL to answer business questions about passenger charges, demand, pickup locations, airport trips, travel behavior, and recorded tipping.
 
-> **Business context:** This is an independent analysis of publicly released TLC records, not a project conducted for NYC TLC or a taxi operator. The figures below come from SQL Server query outputs reviewed during the project. This packaged repository has not itself been rerun end-to-end on a separate SQL Server instance.
+> **Business context:** This is an independent analysis of public NYC TLC records, not work conducted for NYC TLC or a taxi operator.
 
 ## Results at a glance
 
@@ -143,7 +143,7 @@ The saved CSV excerpts reflect the **original** SQL Server analytical population
 
 ![Borough trip and passenger charge shares](images/borough_trip_vs_charge_share.svg)
 
-**Hourly demand:** The full 24-hour SQL analysis is available in [`NYC Taxi.sql`](NYC%20Taxi.sql). A four-hour excerpt is intentionally not presented as a complete hourly distribution. Run the query and export its full result for a 24-hour visualization.
+**Hourly demand:** A full 24-hour profile can be exported from the original SQL Server data with `python src/export_hourly.py --server localhost --trust-server-certificate`, then visualized using `python src/build_charts.py`. The script verifies that the 24 hourly totals sum to **3,324,156** selected trips. A partial four-hour chart is intentionally omitted.
 
 ## KPI methodology & validation
 
@@ -219,7 +219,7 @@ The approximately 57 MB Parquet dataset is **not committed to GitHub**. Download
 
 5. In SSMS, run the **analytical query sections** in `NYC Taxi.sql`, ending with **Borough KPI Reconciliation**. For an existing populated `NYC_Taxi_Analytics` database, **skip ingestion** and execute only the analyses.
 6. Confirm the reconciliation output shows **`TripDifference = 0`** and **`ChargesDifference = 0.00`**. Compare other reported metrics to the values above if you are validating reproduction.
-7. Optionally regenerate PNG/SVG charts from the saved result excerpts with `python src/build_charts.py`. This step uses the CSV files and does not rerun the SQL.
+7. Optionally regenerate PNG/SVG charts with `python src/build_charts.py`. For a **complete hourly-demand chart**, first run `python src/export_hourly.py --server localhost --trust-server-certificate` on your machine with access to SQL Server, then rerun `python src/build_charts.py`.
 
 The single SQL file is the original analyst-authored source (kept unchanged); investigative queries and validation checks are included in the same file.
 
@@ -233,13 +233,13 @@ nyc-taxi-operations-analytics/
 ├── requirements.txt
 ├── src/
 │   ├── load_data.py
+│   ├── export_hourly.py
 │   └── build_charts.py
 ├── data/
 │   └── taxi_zone_lookup.csv
 ├── results/
 │   ├── original_sql_kpi_summary.csv
 │   ├── original_sql_weekday_performance.csv
-│   ├── original_sql_hourly_peaks.csv
 │   ├── original_sql_top_pickup_zones.csv
 │   ├── original_sql_airport_segments.csv
 │   ├── original_sql_payment_mix.csv
@@ -250,7 +250,6 @@ nyc-taxi-operations-analytics/
     ├── airport_vs_nonairport_charge.svg
     ├── payment_method_share.svg
     ├── borough_trip_vs_charge_share.svg
-    └── selected_hour_demand.svg
 ```
 
 ## Limitations and interpretation
@@ -263,7 +262,7 @@ nyc-taxi-operations-analytics/
 - `FLOAT` storage in the original table definition is retained for source consistency; a financial-grade system should use `DECIMAL`/fixed-precision money columns.
 - The original SQL file intentionally retains non-idempotent `CREATE SCHEMA` statements. Run setup only once; execute analyses separately on an already populated database.
 - Some zone reports group by zone names rather than unique `LocationID`, so names shared by distinct IDs may be combined.
-- The saved results are excerpts of the original analysis and may be compared against a fresh local SQL Server execution using the documented queries.
+- The saved results are excerpts of the original analysis. Full clean-environment SQL Server reproduction has not yet been independently certified.
 - This is a portfolio analytics exercise, not a production deployment or real-time pipeline.
 
 ## Author
