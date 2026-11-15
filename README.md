@@ -117,6 +117,38 @@ The initial analytical subset averaged **6.03 miles** per trip. A separate opera
 - Queens: **8.19% of trips** and **22.19% of charges**, consistent with high-charge airport pickup activity.
 - The lookup also includes non-standard borough labels such as **EWR**, **N/A**, and **Unknown**. These are preserved rather than silently reallocated.
 
+## Reproduced results and charts
+
+The saved CSV excerpts below reflect the **original** SQL Server analytical population (**3,324,156** selected trips), **not** the separate revised-filter population (3,241,973 trips). They were assembled from results reviewed during the original analysis, and are provided so reviewers can inspect the findings without a SQL Server installation. **This publication has not been independently rerun end-to-end on a fresh SQL Server instance.** The results are descriptive and do not establish causality.
+
+**Result tables:** [KPI summary](results/original_sql_kpi_summary.csv) · [Weekday performance](results/original_sql_weekday_performance.csv) · [Hourly highlights](results/original_sql_hourly_peaks.csv) · [Top pickup zones](results/original_sql_top_pickup_zones.csv) · [Airport segments](results/original_sql_airport_segments.csv) · [Payment mix](results/original_sql_payment_mix.csv) · [Borough ranking](results/original_sql_borough_ranking.csv).
+
+### Demand by weekday
+
+![Average daily trips by weekday](images/weekday_avg_daily_trips.svg)
+
+### Top pickup zones
+
+![Top pickup zones](images/top_pickup_zones.svg)
+
+### Airport versus non-airport average charges
+
+![Airport versus non-airport charges](images/airport_vs_nonairport_charge.svg)
+
+### Payment method share
+
+![Payment method distribution](images/payment_method_share.svg)
+
+### Borough share of trips and charges
+
+![Borough trip and passenger charge shares](images/borough_trip_vs_charge_share.svg)
+
+### Selected peak-hour observations
+
+![Selected hourly observations (not a 24-hour distribution)](images/selected_hour_demand.svg)
+
+**Chart scope:** The last chart contains only four reported hours; it must **not** be interpreted as a complete 24-hour profile. The pickup-zone ranking reflects grouping in the original SQL, including grouping by zone name in some queries; different location IDs with a shared name may be combined. Charts are generated from the saved CSVs with `python src/build_charts.py` (Python charts can be exported as PNG or SVG).
+
 ## KPI methodology & validation
 
 **Baseline trip subset** used for most commercial/demand metrics:
@@ -171,13 +203,13 @@ The approximately 57 MB Parquet dataset is **not committed to GitHub**. Download
 
 ## Getting started (Windows + SQL Server)
 
-**Requirements:** Microsoft SQL Server, SSMS, Python 3.10+, ODBC Driver 18 for SQL Server; Python packages `pyarrow` and `pyodbc`.
+**Requirements:** Microsoft SQL Server, SSMS, Python 3.10+, ODBC Driver 18 for SQL Server; install the Python packages listed in [`requirements.txt`](requirements.txt).
 
 1. Download the Parquet file using the link above and put it in the `data/` folder.
 2. Install Python packages:
 
    ```powershell
-   python -m pip install pyarrow pyodbc
+   python -m pip install -r requirements.txt
    ```
 
 3. In **SSMS**, open **`NYC Taxi.sql`**. On a **fresh** SQL Server setup, execute **only the opening database/schema/table creation statements** (through the `GO` after creating `dbo.yellow_trips_raw`). Do **not** run all analytical queries before loading records. The two `CREATE SCHEMA` statements in the source are intended for the initial setup; skip them when the schemas already exist.
@@ -191,20 +223,38 @@ The approximately 57 MB Parquet dataset is **not committed to GitHub**. Download
 
 5. In SSMS, run the **analytical query sections** in `NYC Taxi.sql`, ending with **Borough KPI Reconciliation**. For an existing populated `NYC_Taxi_Analytics` database, **skip ingestion** and execute only the analyses.
 6. Confirm the reconciliation output shows **`TripDifference = 0`** and **`ChargesDifference = 0.00`**. Compare other reported metrics to the values above if you are validating reproduction.
+7. Optionally regenerate PNG/SVG charts from the saved result excerpts with `python src/build_charts.py`. This step uses the CSV files and does not rerun the SQL.
 
 The single SQL file is the original analyst-authored source (kept unchanged); investigative queries and validation checks are included in the same file.
 
 ## Repository structure
 
 ```text
-NYC-Taxi-Operations-Analytics/
-├── README.md                  # Project guide, questions, KPI definitions and findings
-├── NYC Taxi.sql               # Original SQL Server analyses and reconciliation
-├── .gitignore                 # Ignore large Parquet and local environment artifacts
+nyc-taxi-operations-analytics/
+├── README.md
+├── NYC Taxi.sql
+├── .gitignore
+├── requirements.txt
 ├── src/
-│   └── load_data.py           # Parquet/CSV -> SQL Server loader
-└── data/
-    └── taxi_zone_lookup.csv   # Small official zone reference table
+│   ├── load_data.py
+│   └── build_charts.py
+├── data/
+│   └── taxi_zone_lookup.csv
+├── results/
+│   ├── original_sql_kpi_summary.csv
+│   ├── original_sql_weekday_performance.csv
+│   ├── original_sql_hourly_peaks.csv
+│   ├── original_sql_top_pickup_zones.csv
+│   ├── original_sql_airport_segments.csv
+│   ├── original_sql_payment_mix.csv
+│   └── original_sql_borough_ranking.csv
+└── images/
+    ├── weekday_avg_daily_trips.svg
+    ├── top_pickup_zones.svg
+    ├── airport_vs_nonairport_charge.svg
+    ├── payment_method_share.svg
+    ├── borough_trip_vs_charge_share.svg
+    └── selected_hour_demand.svg
 ```
 
 ## Limitations and interpretation
@@ -215,7 +265,10 @@ NYC-Taxi-Operations-Analytics/
 - The operational cutoffs were analyst-selected; they can exclude legitimate atypical trips.
 - Payment records do not measure actual cash tipping reliably.
 - `FLOAT` storage in the original table definition is retained for source consistency; a financial-grade system should use `DECIMAL`/fixed-precision money columns.
-- The repository stores SQL and source-loading instructions, not a production deployment or guaranteed real-time pipeline.
+- The original SQL file intentionally retains non-idempotent `CREATE SCHEMA` statements. Run setup only once; execute analyses separately on an already populated database.
+- Some zone reports group by zone names rather than unique `LocationID`, so names shared by distinct IDs may be combined.
+- The saved chart/CSV results are extracts from reviewed original SQL outputs; a fresh end-to-end SQL Server execution of the published package has not yet been independently verified.
+- This is a portfolio analytics exercise, not a production deployment or real-time pipeline.
 
 ## Author
 
