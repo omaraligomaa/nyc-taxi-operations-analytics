@@ -1,0 +1,17 @@
+metric,value,unit
+Source trip records,3475226,records
+Selected trips,3324156,trips
+Excluded trips,151070,trips
+Selected trip share,95.65,percent
+Total passenger charges,88388329.76,USD
+Total fare amount,58962690.44,USD
+Average trip charge,26.59,USD
+Average fare,17.74,USD
+Average recorded tip,3.05,USD
+Baseline average distance,6.03,miles
+Operational trips,3312975,trips
+Operational average distance,3.17,miles
+Operational average duration,14.72,minutes
+Operational average speed,11.33,mph
+Reconciliation trips difference,0,trips
+Reconciliation charges difference,0.00,USD
