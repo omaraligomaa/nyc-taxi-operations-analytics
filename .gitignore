@@ -1,0 +1,19 @@
+# Raw dataset: download it from NYC TLC instead of committing it
+data/*.parquet
+
+# Python artifacts and local environments
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Credentials and local/editor settings
+.env
+.env.*
+!.env.example
+.vscode/
+.idea/
+
+# Temporary database exports and backups
+*.bak
+*.log
