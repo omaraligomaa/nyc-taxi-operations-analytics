@@ -119,9 +119,9 @@ The initial analytical subset averaged **6.03 miles** per trip. A separate opera
 
 ## Reproduced results and charts
 
-The saved CSV excerpts below reflect the **original** SQL Server analytical population (**3,324,156** selected trips), **not** the separate revised-filter population (3,241,973 trips). They were assembled from results reviewed during the original analysis, and are provided so reviewers can inspect the findings without a SQL Server installation. **This publication has not been independently rerun end-to-end on a fresh SQL Server instance.** The results are descriptive and do not establish causality.
+The saved CSV excerpts reflect the **original** SQL Server analytical population (**3,324,156** selected trips). They let reviewers inspect findings without installing SQL Server. The results are descriptive, not causal.
 
-**Result tables:** [KPI summary](results/original_sql_kpi_summary.csv) · [Weekday performance](results/original_sql_weekday_performance.csv) · [Hourly highlights](results/original_sql_hourly_peaks.csv) · [Top pickup zones](results/original_sql_top_pickup_zones.csv) · [Airport segments](results/original_sql_airport_segments.csv) · [Payment mix](results/original_sql_payment_mix.csv) · [Borough ranking](results/original_sql_borough_ranking.csv).
+**Result tables:** [KPI summary](results/original_sql_kpi_summary.csv) · [Weekday performance](results/original_sql_weekday_performance.csv) · [Top pickup zones](results/original_sql_top_pickup_zones.csv) · [Airport segments](results/original_sql_airport_segments.csv) · [Payment mix](results/original_sql_payment_mix.csv) · [Borough ranking](results/original_sql_borough_ranking.csv).
 
 ### Demand by weekday
 
@@ -143,11 +143,7 @@ The saved CSV excerpts below reflect the **original** SQL Server analytical popu
 
 ![Borough trip and passenger charge shares](images/borough_trip_vs_charge_share.svg)
 
-### Selected peak-hour observations
-
-![Selected hourly observations (not a 24-hour distribution)](images/selected_hour_demand.svg)
-
-**Chart scope:** The last chart contains only four reported hours; it must **not** be interpreted as a complete 24-hour profile. The pickup-zone ranking reflects grouping in the original SQL, including grouping by zone name in some queries; different location IDs with a shared name may be combined. Charts are generated from the saved CSVs with `python src/build_charts.py` (Python charts can be exported as PNG or SVG).
+**Hourly demand:** The full 24-hour SQL analysis is available in [`NYC Taxi.sql`](NYC%20Taxi.sql). A four-hour excerpt is intentionally not presented as a complete hourly distribution. Run the query and export its full result for a 24-hour visualization.
 
 ## KPI methodology & validation
 
@@ -267,7 +263,7 @@ nyc-taxi-operations-analytics/
 - `FLOAT` storage in the original table definition is retained for source consistency; a financial-grade system should use `DECIMAL`/fixed-precision money columns.
 - The original SQL file intentionally retains non-idempotent `CREATE SCHEMA` statements. Run setup only once; execute analyses separately on an already populated database.
 - Some zone reports group by zone names rather than unique `LocationID`, so names shared by distinct IDs may be combined.
-- The saved chart/CSV results are extracts from reviewed original SQL outputs; a fresh end-to-end SQL Server execution of the published package has not yet been independently verified.
+- The saved results are excerpts of the original analysis and may be compared against a fresh local SQL Server execution using the documented queries.
 - This is a portfolio analytics exercise, not a production deployment or real-time pipeline.
 
 ## Author
