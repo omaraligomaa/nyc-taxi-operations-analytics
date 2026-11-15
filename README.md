@@ -143,7 +143,6 @@ The saved CSV excerpts reflect the **original** SQL Server analytical population
 
 ![Borough trip and passenger charge shares](images/borough_trip_vs_charge_share.svg)
 
-**Hourly demand:** A full 24-hour profile can be exported from the original SQL Server data with `python src/export_hourly.py --server localhost --trust-server-certificate`, then visualized using `python src/build_charts.py`. The script verifies that the 24 hourly totals sum to **3,324,156** selected trips. A partial four-hour chart is intentionally omitted.
 
 ## KPI methodology & validation
 
@@ -219,7 +218,7 @@ The approximately 57 MB Parquet dataset is **not committed to GitHub**. Download
 
 5. In SSMS, run the **analytical query sections** in `NYC Taxi.sql`, ending with **Borough KPI Reconciliation**. For an existing populated `NYC_Taxi_Analytics` database, **skip ingestion** and execute only the analyses.
 6. Confirm the reconciliation output shows **`TripDifference = 0`** and **`ChargesDifference = 0.00`**. Compare other reported metrics to the values above if you are validating reproduction.
-7. Optionally regenerate PNG/SVG charts with `python src/build_charts.py`. For a **complete hourly-demand chart**, first run `python src/export_hourly.py --server localhost --trust-server-certificate` on your machine with access to SQL Server, then rerun `python src/build_charts.py`.
+7. Optionally regenerate the charts with `python src/build_charts.py`.
 
 The single SQL file is the original analyst-authored source (kept unchanged); investigative queries and validation checks are included in the same file.
 
@@ -233,7 +232,6 @@ nyc-taxi-operations-analytics/
 ├── requirements.txt
 ├── src/
 │   ├── load_data.py
-│   ├── export_hourly.py
 │   └── build_charts.py
 ├── data/
 │   └── taxi_zone_lookup.csv
